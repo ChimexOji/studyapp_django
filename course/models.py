@@ -1,5 +1,7 @@
+from django.contrib.auth.models import User
 from django.db import models
 
+# class for category model in database
 class Category(models.Model):
     title = models.CharField(max_length=255)
     slug = models.SlugField()
@@ -12,7 +14,7 @@ class Category(models.Model):
     class Meta:
         verbose_name_plural = 'categories'
     
-
+# class for course model in database
 class Course(models.Model):
     categories = models.ManyToManyField(Category)
     title = models.CharField(max_length=255)
@@ -25,6 +27,7 @@ class Course(models.Model):
         return self.title
 
 
+# class for lesson model in database
 class Lesson(models.Model):
     DRAFT = 'draft'
     PUBLISHED = 'published'
@@ -49,3 +52,13 @@ class Lesson(models.Model):
     long_description = models.TextField(blank=True, null=True)
     status = models.CharField(max_length=20, choices=CHOICES_STATUS, default=PUBLISHED)
     lesson_type = models.CharField(max_length=20, choices=CHOICES_LESSON_TYPE, default=ARTICLE)
+
+
+# class for comments model in database
+class Comments(models.Model):
+    course = models.ForeignKey(Course, related_name='comments', on_delete=models.CASCADE)
+    lesson = models.ForeignKey(Lesson, related_name='comments', on_delete=models.CASCADE)
+    name = models.CharField(max_length=100)
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(User, related_name='comments', on_delete=models.CASCADE)
