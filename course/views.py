@@ -3,13 +3,24 @@ from django.shortcuts import render
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 
-from .models import Course, Lesson, Comments
-from .serializers import CourseListSerializer, CourseDetailSerializer, LessonListSerializer, CommentSerializer
+from .models import Course, Lesson, Comments, Category
+from .serializers import CourseListSerializer, CourseDetailSerializer, LessonListSerializer, CommentSerializer, CategorySerializer
+
+@api_view(['GET'])
+def get_categories(request):
+    categories = Category.objects.all()
+    serializer = CategorySerializer(categories, many=True)
+    return Response(serializer.data)
 
 # view function for getting courses from database and creates get_courses api endpoint for frontend
 @api_view(['GET'])
 def get_courses(request):
+    category_id = request.GET.get('category_id', '')
     courses = Course.objects.all()
+
+    if category_id:
+        courses = courses.filter(categories__in=[int(category_id)])
+
     serializer = CourseListSerializer(courses, many=True)
     return Response(serializer.data)
 
