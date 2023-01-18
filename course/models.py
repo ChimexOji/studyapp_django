@@ -11,10 +11,10 @@ class Category(models.Model):
 
     def __str__(self):
         return self.title
-    
+
     class Meta:
         verbose_name_plural = 'categories'
-    
+
 # class for course model in database
 class Course(models.Model):
     categories = models.ManyToManyField(Category)
@@ -73,3 +73,6 @@ class Comments(models.Model):
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(User, related_name='comments', on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name_plural = 'comments'

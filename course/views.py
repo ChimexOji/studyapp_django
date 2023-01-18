@@ -1,12 +1,14 @@
 from django.shortcuts import render
 
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
 
 from .models import Course, Lesson, Comments, Category
 from .serializers import CourseListSerializer, CourseDetailSerializer, LessonListSerializer, CommentSerializer, CategorySerializer
 
 @api_view(['GET'])
+@authentication_classes([])
+@permission_classes([])
 def get_categories(request):
     categories = Category.objects.all()
     serializer = CategorySerializer(categories, many=True)
@@ -14,6 +16,8 @@ def get_categories(request):
 
 # view function for getting courses from database and creates get_courses api endpoint for frontend
 @api_view(['GET'])
+@authentication_classes([])
+@permission_classes([])
 def get_courses(request):
     category_id = request.GET.get('category_id', '')
     courses = Course.objects.all()
@@ -26,27 +30,37 @@ def get_courses(request):
 
 # view function for getting courses from database and displaying them in frontpage
 @api_view(['GET'])
+# get courses i.e pictures from database
+@authentication_classes([])
+@permission_classes([])
 def get_frontpage_courses(request):
     courses = Course.objects.all()[0:4]
     serializer = CourseListSerializer(courses, many=True)
     return Response(serializer.data)
 
-# view function for getting single courses and lesson from django-admin backend 
+# view function for getting single courses and lesson from django-admin backend
 # and creates get_course api endpiont for frontend using serializers
 @api_view(['GET'])
+@authentication_classes([])
+@permission_classes([])
 def get_course(request, slug):
     course = Course.objects.get(slug=slug)
     course_serializer = CourseDetailSerializer(course)
     lesson_serializer = LessonListSerializer(course.lessons.all(), many=True)
 
+    if request.user.is_authenticated:
+        course_data = course_serializer.data
+    else:
+        course_data = {}
+
     data = {
-        'course': course_serializer.data,
+        'course': course_data,
         'lessons': lesson_serializer.data
     }
-    
+
     return Response(data)
 
-# view function for getting comments from database and creats api endpoint 
+# view function for getting comments from database and creats api endpoint
 # for displaying in frontend
 @api_view(['GET'])
 def get_comments(request, course_slug, lesson_slug):
